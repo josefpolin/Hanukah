@@ -1,17 +1,3 @@
-//More improvements will be coming to the code later on
-//Code made by Jeremy Haft
-//const int buttonPin = 2;     // the number of the pushbutton pin
-//const int ledPin =  13;      // the number of the LED pin
-//int MELODY_PIN = 4;
-//
-//// variables will change:
-//int buttonState = 0;         // variable for reading the pushbutton status
-//int buttonState2 = 0;
-//int count = 0;
-//int count2 = 0;
-//int buttonprev1 = 0;
-//int buttonState1 = 0;
-//int buttonprev = 0;
 
 #define CANDELS 8
 #define CANDLE_SHAMASH_PIN A0
@@ -20,9 +6,9 @@
 #define CANDLE3_PIN A3
 #define CANDLE4_PIN A4
 #define CANDLE5_PIN A5
-#define CANDLE6_PIN A6
-#define CANDLE7_PIN A7
-#define CANDLE8_PIN 1 // TODO determinate
+#define CANDLE6_PIN 13
+#define CANDLE7_PIN 12
+#define CANDLE8_PIN 11
 
 #define B_PLUSS_PIN 2
 #define B_MINUS_PIN 3
@@ -32,8 +18,7 @@
 #define MELODY_PIN 9
 
 byte candle_array[] = {CANDLE1_PIN, CANDLE2_PIN, CANDLE3_PIN, CANDLE4_PIN, CANDLE5_PIN,
-                       CANDLE6_PIN, CANDLE7_PIN, CANDLE8_PIN
-                      };
+                       CANDLE6_PIN, CANDLE7_PIN, CANDLE8_PIN};
 int candle_state[] = {0, 0, 0, 0, 0, 0, 0, 0};
 int candle_count = 0;
 
@@ -61,25 +46,12 @@ void setup() {
   pinMode(B_MUSIC_PIN, INPUT);
   pinMode(B_FLASH_PIN, INPUT);
 
-  //  pinMode(ledPin, OUTPUT);
-  //  pinMode(12, OUTPUT);
-  //  pinMode(11, OUTPUT);
-  //  pinMode(10, OUTPUT);
-  //  pinMode(9, OUTPUT);
-  //  pinMode(8, OUTPUT);
-  //  pinMode(7, OUTPUT);
-  //  pinMode(6, OUTPUT);
-  //  pinMode(5, OUTPUT);
-  //
-  //  // initialize the pushbutton pin as an input:
-  //  pinMode(buttonPin, INPUT);
-  //  pinMode(3, INPUT);
-  //    Serial.begin(9600);
+	//  SETUP TONE
+	pinMode(MELODY_PIN, OUTPUT);
+
 }
 
 void loop() {
-  digitalWrite(CANDLE_SHAMASH_PIN, HIGH);
-
   b_pluss_state = digitalRead(B_PLUSS_PIN);
   b_minus_state = digitalRead(B_MINUS_PIN);
   b_music_state = digitalRead(B_MUSIC_PIN);
@@ -126,23 +98,25 @@ void loop() {
     }
   }
 
+
   // write led candle array
+  digitalWrite(CANDLE_SHAMASH_PIN, HIGH);
   for (int i = 0; i <= CANDELS; i++)
   {
-    //    analogWrite(led_array[i], led_state[i]);
     digitalWrite(candle_array[i], candle_state[i]);
   }
 
+	// play music set
   switch (candle_count)
   {
     case 0:
-      // TODO add zerostate
+      midi0();
       break;
 
     case 1:
       midi1();
       break;
-      
+
     case 2:
       midi2();
       break;
@@ -158,7 +132,7 @@ void loop() {
     case 5:
       midi5();
       break;
-  
+
     case 6:
       midi6();
       break;
@@ -170,80 +144,16 @@ void loop() {
     case 8:
       midi8();
       break;
-  
+
     default:
       // TODO add default
       printf("OPPSS");
+      midi0();
+      delay (100);
+      midi0();
   }
-
-
-
-
-  //   digitalWrite(9, HIGH);
-  //  Serial.println(count);
-  //  // read the state of the pushbutton value:
-  //  buttonState = digitalRead(buttonPin);
-  //buttonState2 = digitalRead(3);
-  //  // check if the pushbutton is pressed.
-  //  // if it is, the buttonState is HIGH:
-  //  if (buttonState == LOW & buttonprev == 0) {
-  //    // turn LED on:
-  //    count += 1;
-  //    buttonprev = 1;
-  //  }
-  //    else if (buttonState == HIGH){
-  //    // turn LED off:
-  //     buttonprev = 0;
-
-  //  }
-  //    else if (count == 0){
-  //  digitalWrite(ledPin, LOW);
-  //  digitalWrite(12, LOW);
-  //  digitalWrite(11, LOW);
-  //  digitalWrite(10, LOW);
-  //  digitalWrite(8, LOW);
-  //  digitalWrite(7, LOW);
-  //  digitalWrite(6, LOW);
-  //  digitalWrite(5, LOW);
-  //    digitalWrite(9, HIGH);
-  //  }
-  //  else if (count == 1){
-  //
-  //    digitalWrite(ledPin, HIGH);
-  //    midi();
-  //  }
-  //    else if (count == 2){
-  //    digitalWrite(12, HIGH);
-  //    midi1();
-  //  }
-  //      else if (count == 3){
-  //    digitalWrite(11, HIGH);
-  //    midi2();
-  //  }
-  //        else if (count == 4){
-  //    digitalWrite(10, HIGH);
-  //    midi3();
-  //  }
-  //        else if (count == 5){
-  //    digitalWrite(8, HIGH);
-  //    midi4();
-  //  }
-  //        else if (count == 6){
-  //    digitalWrite(7, HIGH);
-  //    midi5();
-  //  }
-  //        else if (count == 7){
-  //    digitalWrite(6, HIGH);
-  //    midi6();
-  //  }
-  //        else if (count == 8){
-  //    digitalWrite(5, HIGH);
-  //    midi7();
-  //  }
-  //  else if (count == 9){
-  //    count = 0;
-  //  }
 }
+
 void midi8() {
   delay(1);
   delay(76.7894070513);
@@ -401,11 +311,9 @@ void midi8() {
   tone(MELODY_PIN, 523, 223.857814904);
   delay(248.730905449);
   delay(196.146854968);
-
-
 }
-void midi1() {
 
+void midi1() {
   tone(MELODY_PIN, 329, 231.384615385);
   delay(246.153846154);
   delay(49.2307692308);
@@ -434,19 +342,11 @@ void midi1() {
   delay(246.153846154);
   delay(49.2307692308);
   tone(MELODY_PIN, 369, 205.353846154);
-
-  //delay(246.153846154); //Add to song after you comment out extra note
-  //delay(49.2307692308);
-
-  delay(218.461538462); //commment out from here to remove extra note
+  delay(218.461538462);
   delay(3.07692307692);
   tone(MELODY_PIN, 369, 66.5230769231);
   delay(70.7692307692);
-  delay(3.07692307692); //till here
-
-  //delay(246.153846154); //new test
-  //delay(49.2307692308); //new test
-
+  delay(3.07692307692);
   tone(MELODY_PIN, 440, 231.384615385);
   delay(246.153846154);
   delay(49.2307692308);
@@ -543,7 +443,6 @@ void midi1() {
   delay(3.07692307692);
   tone(MELODY_PIN, 369, 231.384615385);
   delay(246.153846154);
-
   delay(344.615384615);
   tone(MELODY_PIN, 415, 370.215384615);
   delay(393.846153846);
@@ -580,15 +479,12 @@ void midi1() {
   delay(49.2307692308);
   tone(MELODY_PIN, 415, 277.661538462);
   delay(295.384615385);
-  //tone(MELODY_PIN, 369, 231.384615385); //tune down
-  tone(MELODY_PIN, 440, 231.384615385); //tune up
+  tone(MELODY_PIN, 440, 231.384615385);
   delay(246.153846154);
   delay(49.2307692308);
-  //tone(MELODY_PIN, 329, 485.907692308);// tune down
-  tone(MELODY_PIN, 493 , 485.907692308); //tune up
+  tone(MELODY_PIN, 493 , 485.907692308);
   delay(516.923076923);
   delay(49.2307692308);
-
   tone(MELODY_PIN, 415, 370.215384615);
   delay(393.846153846);
   delay(49.2307692308);
@@ -2092,9 +1988,13 @@ void midi7() {
   tone(MELODY_PIN, 440, 368.303375);
   delay(409.225972222);
   delay(45.5728923611);
-  //tone(MELODY_PIN, 391, 198.381590625);
   tone(MELODY_PIN, 391, 210.381590625);
   delay(220.423989583);
   delay(220.423989583);
 
+}
+
+void midi0()
+{
+  tone(MELODY_PIN, 293, 417.689509375);
 }
