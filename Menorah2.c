@@ -1,21 +1,21 @@
 
 #define CANDELS 8
-#define CANDLE_SHAMASH_PIN A0
-#define CANDLE1_PIN A1
-#define CANDLE2_PIN A2
-#define CANDLE3_PIN A3
-#define CANDLE4_PIN A4
-#define CANDLE5_PIN A5
-#define CANDLE6_PIN 13
-#define CANDLE7_PIN 12
-#define CANDLE8_PIN 11
+#define CANDLE_SHAMASH_PIN 11
+#define CANDLE1_PIN 3
+#define CANDLE2_PIN 4
+#define CANDLE3_PIN 5
+#define CANDLE4_PIN 6
+#define CANDLE5_PIN 7
+#define CANDLE6_PIN 8
+#define CANDLE7_PIN 9
+#define CANDLE8_PIN 10
 
-#define B_PLUSS_PIN 2
-#define B_MINUS_PIN 3
-#define B_MUSIC_PIN 4
-#define B_FLASH_PIN 5
+#define B_PLUSS_PIN A0
+#define B_MINUS_PIN A1
+#define B_MUSIC_PIN A2
+#define B_FLASH_PIN A3
 
-#define MELODY_PIN 9
+#define MELODY_PIN 2
 
 byte candle_array[] = {CANDLE1_PIN, CANDLE2_PIN, CANDLE3_PIN, CANDLE4_PIN, CANDLE5_PIN,
                        CANDLE6_PIN, CANDLE7_PIN, CANDLE8_PIN};
@@ -61,7 +61,8 @@ void loop() {
   if (b_pluss_state == HIGH)
   {
     candle_count++;
-    candle_count = candle_count % 8;
+	if (candle_count > 8)
+		candle_count = 8;
     delay (50);
   }
 
@@ -85,23 +86,18 @@ void loop() {
     delay (50);
   }
 
-  //update led candle array
+  //update led candle array  
   for (int i = 0; i < CANDELS; i++)
-  {
-    if (i <= candle_count)
-    {
-      candle_state[i] = 255;
-    }
-    else
-    {
-      candle_state[i] = 0;
-    }
+  {     
+    candle_state[i] = LOW;
+    
+	if (i < candle_count)
+		candle_state[i] = HIGH;
   }
-
 
   // write led candle array
   digitalWrite(CANDLE_SHAMASH_PIN, HIGH);
-  for (int i = 0; i <= CANDELS; i++)
+  for (int i = 0; i < CANDELS; i++)
   {
     digitalWrite(candle_array[i], candle_state[i]);
   }
@@ -111,6 +107,7 @@ void loop() {
   {
     case 0:
       midi0();
+	  candle_count = 9; // go to silent mode next iteration
       break;
 
     case 1:
@@ -144,17 +141,19 @@ void loop() {
     case 8:
       midi8();
       break;
-
+	  
+	case 9:
+	//silent 
+	  break;
+		
     default:
-      // TODO add default
-      printf("OPPSS");
       midi0();
-      delay (100);
       midi0();
   }
 }
 
-void midi8() {
+void midi8()
+{
   delay(1);
   delay(76.7894070513);
   delay(35.0560336538);
@@ -313,7 +312,8 @@ void midi8() {
   delay(196.146854968);
 }
 
-void midi1() {
+void midi1()
+{
   tone(MELODY_PIN, 329, 231.384615385);
   delay(246.153846154);
   delay(49.2307692308);
@@ -526,8 +526,9 @@ void midi1() {
   tone(MELODY_PIN, 329, 485.907692308);
   delay(516.923076923);
 }
-void midi2() {
 
+void midi2()
+{
   delay(230.902777778);
   delay(51.2152777778);
   tone(MELODY_PIN, 698, 103.90625);
@@ -717,8 +718,9 @@ void midi2() {
   delay(350.694444444);
   delay(59.8958333333);
 }
-void midi3() {
 
+void midi3() 
+{
   tone(MELODY_PIN, 523, 374.21875);
   delay(415.798611111);
   delay(0.868055555556);
@@ -1097,11 +1099,10 @@ void midi3() {
   tone(MELODY_PIN, 523, 1499.21875);
   delay(1665.79861111);
   delay(0.868055555556);
-
-
 }
-void midi4() {
 
+void midi4()
+{
   tone(MELODY_PIN, 329, 170.454375);
   delay(189.39375);
   tone(MELODY_PIN, 493, 170.454375);
@@ -1303,8 +1304,9 @@ void midi4() {
   tone(MELODY_PIN, 329, 1022.72625);
   delay(1136.3625);
 }
-void midi5() {
 
+void midi5()
+{
   tone(MELODY_PIN, 391, 90.5796875);
   delay(100.644097222);
   delay(130.837326389);
@@ -1578,12 +1580,10 @@ void midi5() {
   tone(MELODY_PIN, 1046, 371.37671875);
   delay(412.640798611);
   delay(70.4508680556);
-
-
 }
 
-void midi6() {
-
+void midi6()
+{
   tone(MELODY_PIN, 349, 84.5286885246);
   delay(93.9207650273);
   delay(128.927595628);
@@ -1991,10 +1991,11 @@ void midi7() {
   tone(MELODY_PIN, 391, 210.381590625);
   delay(220.423989583);
   delay(220.423989583);
-
 }
 
 void midi0()
 {
   tone(MELODY_PIN, 293, 417.689509375);
+  delay(200);
+  tone(MELODY_PIN, 0, 0);
 }
