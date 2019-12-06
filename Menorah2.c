@@ -1,6 +1,6 @@
 
 #define CANDELS 8
-#define CANDLE_SHAMASH_PIN 11
+#define CANDLE_SHAMASH_PIN 13
 #define CANDLE1_PIN 3
 #define CANDLE2_PIN 4
 #define CANDLE3_PIN 5
@@ -12,20 +12,31 @@
 
 #define B_PLUSS_PIN A0
 #define B_MINUS_PIN A1
-#define B_MUSIC_PIN A2
 #define B_FLASH_PIN A3
 
 #define MELODY_PIN 2
+
+// PWM pins 3 5 6 9 10 11
+#define PWM_PIN 11
+#define HANDLE_PIN A4
+
+
 
 byte candle_array[] = {CANDLE1_PIN, CANDLE2_PIN, CANDLE3_PIN, CANDLE4_PIN, CANDLE5_PIN,
                        CANDLE6_PIN, CANDLE7_PIN, CANDLE8_PIN};
 int candle_state[] = {0, 0, 0, 0, 0, 0, 0, 0};
 int candle_count = 0;
 
+//Push buttons
 int b_pluss_state = 0;
 int b_minus_state = 0;
-int b_music_state = 0;
 int b_flash_state = 0;
+
+//savivon rotation speed handle
+int pwm_pin_to_motor = PWM_PIN;
+int handle_pin_regulator = HANDLE_PIN;
+int savivon_pwm_high = 0;
+int savivon_pwm_low = 0;
 
 void setup() {
   // initialize the LED pin as an output:
@@ -43,26 +54,31 @@ void setup() {
   //  SETUP BUTTONS
   pinMode(B_PLUSS_PIN, INPUT);
   pinMode(B_MINUS_PIN, INPUT);
-  pinMode(B_MUSIC_PIN, INPUT);
   pinMode(B_FLASH_PIN, INPUT);
 
-	//  SETUP TONE
-	pinMode(MELODY_PIN, OUTPUT);
+  //  SETUP TONE
+  pinMode(MELODY_PIN, OUTPUT);
+
+  //  SETUP HANDLE
+  pinMode(pwm_pin_to_motor, OUTPUT); 
+  pinMode(handle_pin_regulator, INPUT);  
 
 }
 
 void loop() {
+  //  read user handle command
+  savivon_pwm_low = analogRead(handle_pin_regulator);   
+  
+  //  read user push buttons command
   b_pluss_state = digitalRead(B_PLUSS_PIN);
   b_minus_state = digitalRead(B_MINUS_PIN);
-  b_music_state = digitalRead(B_MUSIC_PIN);
   b_flash_state = digitalRead(B_FLASH_PIN);
 
-  //  read user command
   if (b_pluss_state == HIGH)
   {
     candle_count++;
-	if (candle_count > 8)
-		candle_count = 8;
+  if (candle_count > 8)
+    candle_count = 8;
     delay (50);
   }
 
@@ -74,25 +90,28 @@ void loop() {
     delay (50);
   }
 
-  if (b_music_state == HIGH)
-  {
-    //  TODO implement state
-    delay (50);
-  }
-
   if (b_flash_state == HIGH)
   {
     //  TODO implement state
     delay (50);
   }
 
+
+  //  savivon rotation spead updating
+  savivon_pwm_high = 1024 - savivon_pwm_low;
+  digitalWrite(pwm_pin_to_motor, HIGH); 
+  delayMicroseconds(savivon_pwm_high);   
+  digitalWrite(pwm_pin_to_motor, LOW);  
+  delayMicroseconds(savivon_pwm_low);  
+
+
   //update led candle array  
   for (int i = 0; i < CANDELS; i++)
   {     
     candle_state[i] = LOW;
     
-	if (i < candle_count)
-		candle_state[i] = HIGH;
+  if (i < candle_count)
+    candle_state[i] = HIGH;
   }
 
   // write led candle array
@@ -102,12 +121,12 @@ void loop() {
     digitalWrite(candle_array[i], candle_state[i]);
   }
 
-	// play music set
+  // play music set
   switch (candle_count)
   {
     case 0:
       midi0();
-	  candle_count = 9; // go to silent mode next iteration
+    candle_count = 9; // go to silent mode next iteration
       break;
 
     case 1:
@@ -141,180 +160,41 @@ void loop() {
     case 8:
       midi8();
       break;
-	  
-	case 9:
-	//silent 
-	  break;
-		
+    
+  case 9:
+  //silent 
+    break;
+    
     default:
       midi0();
       midi0();
   }
 }
 
-void midi8()
+int my_delay(float time_delay)
 {
-  delay(1);
-  delay(76.7894070513);
-  delay(35.0560336538);
-  tone(MELODY_PIN, 261, 88.6416850962);
-  delay(98.4907612179);
-  delay(90.9787540064);
-  tone(MELODY_PIN, 261, 98.4072944712);
-  delay(109.341438301);
-  delay(93.4827564103);
-  tone(MELODY_PIN, 293, 60.8472584135);
-  delay(67.6080649038);
-  delay(126.869455128);
-  tone(MELODY_PIN, 261, 72.1152692308);
-  delay(80.1280769231);
-  delay(126.869455128);
-  tone(MELODY_PIN, 329, 69.1104663462);
-  delay(76.7894070513);
-  delay(127.704122596);
-  tone(MELODY_PIN, 261, 247.896237981);
-  delay(275.440264423);
-  delay(119.357447917);
-  tone(MELODY_PIN, 329, 70.6128677885);
-  delay(78.4587419872);
-  delay(111.010773237);
-  tone(MELODY_PIN, 391, 61.5984591346);
-  delay(68.4427323718);
-  delay(135.216129808);
-  tone(MELODY_PIN, 391, 82.6320793269);
-  delay(91.8134214744);
-  delay(106.002768429);
-  tone(MELODY_PIN, 349, 75.1200721154);
-  delay(83.4667467949);
-  delay(116.853445513);
-  tone(MELODY_PIN, 329, 72.1152692308);
-  delay(80.1280769231);
-  delay(114.349443109);
-  tone(MELODY_PIN, 293, 374.097959135);
-  delay(415.664399038);
-  delay(201.154859776);
-  tone(MELODY_PIN, 293, 78.124875);
-  delay(86.8054166667);
-  delay(109.341438301);
-  tone(MELODY_PIN, 293, 78.8760757212);
-  delay(87.6400841346);
-  delay(116.853445513);
-  tone(MELODY_PIN, 293, 75.8712728365);
-  delay(84.3014142628);
-  delay(125.200120192);
-  tone(MELODY_PIN, 329, 78.124875);
-  delay(86.8054166667);
-  delay(116.018778045);
-  tone(MELODY_PIN, 329, 68.359265625);
-  delay(75.9547395833);
-  delay(114.349443109);
-  tone(MELODY_PIN, 349, 50.3304483173);
-  delay(55.9227203526);
-  delay(136.885464744);
-  tone(MELODY_PIN, 293, 214.092205529);
-  delay(237.880228365);
-  delay(166.098826122);
-  tone(MELODY_PIN, 293, 78.8760757212);
-  delay(87.6400841346);
-  delay(106.837435897);
-  tone(MELODY_PIN, 391, 77.3736742788);
-  delay(85.9707491987);
-  delay(113.514775641);
-  tone(MELODY_PIN, 349, 69.1104663462);
-  delay(76.7894070513);
-  delay(129.373457532);
-  tone(MELODY_PIN, 329, 72.8664699519);
-  delay(80.962744391);
-  delay(111.010773237);
-  tone(MELODY_PIN, 293, 61.5984591346);
-  delay(68.4427323718);
-  delay(152.744146635);
-  tone(MELODY_PIN, 261, 93.1488894231);
-  delay(103.498766026);
-  delay(481.603129006);
-  tone(MELODY_PIN, 329, 136.71853125);
-  delay(151.909479167);
-  delay(45.0720432692);
-  tone(MELODY_PIN, 391, 66.8568641827);
-  delay(74.2854046474);
-  delay(131.042792468);
-  tone(MELODY_PIN, 329, 77.3736742788);
-  delay(85.9707491987);
-  delay(116.853445513);
-  tone(MELODY_PIN, 391, 73.6176706731);
-  delay(81.797411859);
-  delay(118.522780449);
-  tone(MELODY_PIN, 329, 61.5984591346);
-  delay(68.4427323718);
-  delay(139.389467147);
-  tone(MELODY_PIN, 391, 67.6080649038);
-  delay(75.1200721154);
-  delay(119.357447917);
-  tone(MELODY_PIN, 329, 220.101811298);
-  delay(244.557568109);
-  delay(176.949503205);
-  tone(MELODY_PIN, 329, 132.211326923);
-  delay(146.901474359);
-  delay(57.5920552885);
-  tone(MELODY_PIN, 391, 71.3640685096);
-  delay(79.2934094551);
-  delay(107.672103365);
-  tone(MELODY_PIN, 391, 80.3784771635);
-  delay(89.3094190705);
-  delay(100.160096154);
-  tone(MELODY_PIN, 349, 68.359265625);
-  delay(75.9547395833);
-  delay(105.168100962);
-  tone(MELODY_PIN, 329, 63.1008605769);
-  delay(70.1120673077);
-  delay(122.696117788);
-  tone(MELODY_PIN, 293, 218.599409856);
-  delay(242.888233173);
-  delay(375.600360577);
-  tone(MELODY_PIN, 293, 134.464929087);
-  delay(149.405476763);
-  delay(52.5840504808);
-  tone(MELODY_PIN, 349, 87.890484375);
-  delay(97.65609375);
-  delay(90.9787540064);
-  tone(MELODY_PIN, 293, 79.6272764423);
-  delay(88.4747516026);
-  delay(111.010773237);
-  tone(MELODY_PIN, 349, 77.3736742788);
-  delay(85.9707491987);
-  delay(123.530785256);
-  tone(MELODY_PIN, 293, 75.8712728365);
-  delay(84.3014142628);
-  delay(125.200120192);
-  tone(MELODY_PIN, 349, 69.1104663462);
-  delay(76.7894070513);
-  delay(126.03478766);
-  tone(MELODY_PIN, 293, 172.776165865);
-  delay(191.973517628);
-  delay(195.3121875);
-  tone(MELODY_PIN, 293, 128.455323317);
-  delay(142.728137019);
-  delay(55.0880528846);
-  tone(MELODY_PIN, 391, 90.1440865385);
-  delay(100.160096154);
-  delay(116.853445513);
-  tone(MELODY_PIN, 391, 79.6272764423);
-  delay(88.4747516026);
-  delay(111.010773237);
-  tone(MELODY_PIN, 440, 77.3736742788);
-  delay(85.9707491987);
-  delay(100.160096154);
-  tone(MELODY_PIN, 493, 70.6128677885);
-  delay(78.4587419872);
-  delay(132.712127404);
-  tone(MELODY_PIN, 523, 223.857814904);
-  delay(248.730905449);
-  delay(196.146854968);
+  b_pluss_state = digitalRead(B_PLUSS_PIN);
+  b_minus_state = digitalRead(B_MINUS_PIN);
+  b_flash_state = digitalRead(B_FLASH_PIN);
+  if (b_pluss_state == HIGH |b_minus_state == HIGH | b_flash_state == HIGH)
+    return 1;
+  delay(time_delay);
+  return 0;
+    
+}
+
+void midi0()
+{
+  tone(MELODY_PIN, 293, 417.689509375);
+  delay(200);
+  tone(MELODY_PIN, 0, 0);
 }
 
 void midi1()
 {
   tone(MELODY_PIN, 329, 231.384615385);
+  if (my_delay(246.153846154) > 0)
+    break;
   delay(246.153846154);
   delay(49.2307692308);
   tone(MELODY_PIN, 246, 231.384615385);
@@ -1993,9 +1873,163 @@ void midi7() {
   delay(220.423989583);
 }
 
-void midi0()
+void midi8()
 {
-  tone(MELODY_PIN, 293, 417.689509375);
-  delay(200);
-  tone(MELODY_PIN, 0, 0);
+  delay(1);
+  delay(76.7894070513);
+  delay(35.0560336538);
+  tone(MELODY_PIN, 261, 88.6416850962);
+  delay(98.4907612179);
+  delay(90.9787540064);
+  tone(MELODY_PIN, 261, 98.4072944712);
+  delay(109.341438301);
+  delay(93.4827564103);
+  tone(MELODY_PIN, 293, 60.8472584135);
+  delay(67.6080649038);
+  delay(126.869455128);
+  tone(MELODY_PIN, 261, 72.1152692308);
+  delay(80.1280769231);
+  delay(126.869455128);
+  tone(MELODY_PIN, 329, 69.1104663462);
+  delay(76.7894070513);
+  delay(127.704122596);
+  tone(MELODY_PIN, 261, 247.896237981);
+  delay(275.440264423);
+  delay(119.357447917);
+  tone(MELODY_PIN, 329, 70.6128677885);
+  delay(78.4587419872);
+  delay(111.010773237);
+  tone(MELODY_PIN, 391, 61.5984591346);
+  delay(68.4427323718);
+  delay(135.216129808);
+  tone(MELODY_PIN, 391, 82.6320793269);
+  delay(91.8134214744);
+  delay(106.002768429);
+  tone(MELODY_PIN, 349, 75.1200721154);
+  delay(83.4667467949);
+  delay(116.853445513);
+  tone(MELODY_PIN, 329, 72.1152692308);
+  delay(80.1280769231);
+  delay(114.349443109);
+  tone(MELODY_PIN, 293, 374.097959135);
+  delay(415.664399038);
+  delay(201.154859776);
+  tone(MELODY_PIN, 293, 78.124875);
+  delay(86.8054166667);
+  delay(109.341438301);
+  tone(MELODY_PIN, 293, 78.8760757212);
+  delay(87.6400841346);
+  delay(116.853445513);
+  tone(MELODY_PIN, 293, 75.8712728365);
+  delay(84.3014142628);
+  delay(125.200120192);
+  tone(MELODY_PIN, 329, 78.124875);
+  delay(86.8054166667);
+  delay(116.018778045);
+  tone(MELODY_PIN, 329, 68.359265625);
+  delay(75.9547395833);
+  delay(114.349443109);
+  tone(MELODY_PIN, 349, 50.3304483173);
+  delay(55.9227203526);
+  delay(136.885464744);
+  tone(MELODY_PIN, 293, 214.092205529);
+  delay(237.880228365);
+  delay(166.098826122);
+  tone(MELODY_PIN, 293, 78.8760757212);
+  delay(87.6400841346);
+  delay(106.837435897);
+  tone(MELODY_PIN, 391, 77.3736742788);
+  delay(85.9707491987);
+  delay(113.514775641);
+  tone(MELODY_PIN, 349, 69.1104663462);
+  delay(76.7894070513);
+  delay(129.373457532);
+  tone(MELODY_PIN, 329, 72.8664699519);
+  delay(80.962744391);
+  delay(111.010773237);
+  tone(MELODY_PIN, 293, 61.5984591346);
+  delay(68.4427323718);
+  delay(152.744146635);
+  tone(MELODY_PIN, 261, 93.1488894231);
+  delay(103.498766026);
+  delay(481.603129006);
+  tone(MELODY_PIN, 329, 136.71853125);
+  delay(151.909479167);
+  delay(45.0720432692);
+  tone(MELODY_PIN, 391, 66.8568641827);
+  delay(74.2854046474);
+  delay(131.042792468);
+  tone(MELODY_PIN, 329, 77.3736742788);
+  delay(85.9707491987);
+  delay(116.853445513);
+  tone(MELODY_PIN, 391, 73.6176706731);
+  delay(81.797411859);
+  delay(118.522780449);
+  tone(MELODY_PIN, 329, 61.5984591346);
+  delay(68.4427323718);
+  delay(139.389467147);
+  tone(MELODY_PIN, 391, 67.6080649038);
+  delay(75.1200721154);
+  delay(119.357447917);
+  tone(MELODY_PIN, 329, 220.101811298);
+  delay(244.557568109);
+  delay(176.949503205);
+  tone(MELODY_PIN, 329, 132.211326923);
+  delay(146.901474359);
+  delay(57.5920552885);
+  tone(MELODY_PIN, 391, 71.3640685096);
+  delay(79.2934094551);
+  delay(107.672103365);
+  tone(MELODY_PIN, 391, 80.3784771635);
+  delay(89.3094190705);
+  delay(100.160096154);
+  tone(MELODY_PIN, 349, 68.359265625);
+  delay(75.9547395833);
+  delay(105.168100962);
+  tone(MELODY_PIN, 329, 63.1008605769);
+  delay(70.1120673077);
+  delay(122.696117788);
+  tone(MELODY_PIN, 293, 218.599409856);
+  delay(242.888233173);
+  delay(375.600360577);
+  tone(MELODY_PIN, 293, 134.464929087);
+  delay(149.405476763);
+  delay(52.5840504808);
+  tone(MELODY_PIN, 349, 87.890484375);
+  delay(97.65609375);
+  delay(90.9787540064);
+  tone(MELODY_PIN, 293, 79.6272764423);
+  delay(88.4747516026);
+  delay(111.010773237);
+  tone(MELODY_PIN, 349, 77.3736742788);
+  delay(85.9707491987);
+  delay(123.530785256);
+  tone(MELODY_PIN, 293, 75.8712728365);
+  delay(84.3014142628);
+  delay(125.200120192);
+  tone(MELODY_PIN, 349, 69.1104663462);
+  delay(76.7894070513);
+  delay(126.03478766);
+  tone(MELODY_PIN, 293, 172.776165865);
+  delay(191.973517628);
+  delay(195.3121875);
+  tone(MELODY_PIN, 293, 128.455323317);
+  delay(142.728137019);
+  delay(55.0880528846);
+  tone(MELODY_PIN, 391, 90.1440865385);
+  delay(100.160096154);
+  delay(116.853445513);
+  tone(MELODY_PIN, 391, 79.6272764423);
+  delay(88.4747516026);
+  delay(111.010773237);
+  tone(MELODY_PIN, 440, 77.3736742788);
+  delay(85.9707491987);
+  delay(100.160096154);
+  tone(MELODY_PIN, 493, 70.6128677885);
+  delay(78.4587419872);
+  delay(132.712127404);
+  tone(MELODY_PIN, 523, 223.857814904);
+  delay(248.730905449);
+  delay(196.146854968);
 }
+
