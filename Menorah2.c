@@ -1,6 +1,6 @@
 
 #define CANDELS 8
-#define CANDLE_SHAMASH_PIN 13
+#define CANDLE_SHAMASH_PIN 11
 #define CANDLE1_PIN 3
 #define CANDLE2_PIN 4
 #define CANDLE3_PIN 5
@@ -12,14 +12,10 @@
 
 #define B_PLUSS_PIN A0
 #define B_MINUS_PIN A1
-#define B_FLASH_PIN A3
+#define B_FLASH_PIN A2
+#define B_MUSIC_PIN A2
 
 #define MELODY_PIN 2
-
-// PWM pins 3 5 6 9 10 11
-#define PWM_PIN 11
-#define HANDLE_PIN A4
-
 
 
 byte candle_array[] = {CANDLE1_PIN, CANDLE2_PIN, CANDLE3_PIN, CANDLE4_PIN, CANDLE5_PIN,
@@ -30,13 +26,8 @@ int candle_count = 0;
 //Push buttons
 int b_pluss_state = 0;
 int b_minus_state = 0;
+int b_music_state = 0;
 int b_flash_state = 0;
-
-//savivon rotation speed handle
-int pwm_pin_to_motor = PWM_PIN;
-int handle_pin_regulator = HANDLE_PIN;
-int savivon_pwm_high = 0;
-int savivon_pwm_low = 0;
 
 void setup() {
   // initialize the LED pin as an output:
@@ -58,20 +49,14 @@ void setup() {
 
   //  SETUP TONE
   pinMode(MELODY_PIN, OUTPUT);
-
-  //  SETUP HANDLE
-  pinMode(pwm_pin_to_motor, OUTPUT); 
-  pinMode(handle_pin_regulator, INPUT);  
-
 }
 
 void loop() {
-  //  read user handle command
-  savivon_pwm_low = analogRead(handle_pin_regulator);   
   
   //  read user push buttons command
   b_pluss_state = digitalRead(B_PLUSS_PIN);
   b_minus_state = digitalRead(B_MINUS_PIN);
+  b_music_state = digitalRead(B_MUSIC_PIN);
   b_flash_state = digitalRead(B_FLASH_PIN);
 
   if (b_pluss_state == HIGH)
@@ -89,20 +74,18 @@ void loop() {
       candle_count = 0;
     delay (50);
   }
-
+  
+  if (b_music_state == HIGH)
+  {
+    //  TODO implement state
+    delay (50);
+  }
+  
   if (b_flash_state == HIGH)
   {
     //  TODO implement state
     delay (50);
   }
-
-
-  //  savivon rotation spead updating
-  savivon_pwm_high = 1024 - savivon_pwm_low;
-  digitalWrite(pwm_pin_to_motor, HIGH); 
-  delayMicroseconds(savivon_pwm_high);   
-  digitalWrite(pwm_pin_to_motor, LOW);  
-  delayMicroseconds(savivon_pwm_low);  
 
 
   //update led candle array  
@@ -194,7 +177,7 @@ void midi1()
 {
   tone(MELODY_PIN, 329, 231.384615385);
   if (my_delay(246.153846154) > 0)
-    break;
+    return;
   delay(246.153846154);
   delay(49.2307692308);
   tone(MELODY_PIN, 246, 231.384615385);
@@ -2032,4 +2015,3 @@ void midi8()
   delay(248.730905449);
   delay(196.146854968);
 }
-
